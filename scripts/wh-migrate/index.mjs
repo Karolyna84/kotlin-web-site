@@ -32,14 +32,20 @@ async function* getFiles(dir) {
         const content = await readFile(fullPath, 'utf8');
         const match = content.match(/\nredirect_path: (.+)\n/);
 
-        const redirectPath = ((match && match[1]) || to)
-            .replace(/^([^\/])/, '/$1')
-            .replace(/\.md$/, '.html');
+        if (match && match[1]) continue
+
+        const { href, pathname } = new URL(
+            to.replace(/\.md$/, '.html'),
+            'https://kotlinlang.org'
+        );
 
         await writeFile(fullPath, `---
 title: ${relativePath}
 showAuthorInfo: false
-redirect_path: https://kotlinlang.org${redirectPath}
----`);
+redirect_path: ${href}
+---
+
+The page is moved to [${pathname}](${pathname})
+`);
     }
 })();
